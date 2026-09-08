@@ -21,3 +21,7 @@ The API starts at `http://localhost:5000`.
 - `PATCH /api/users/me` updates the authenticated user's name or password.
 
 Set `VITE_API_URL=http://localhost:5000/api` in the frontend application's environment file (already provided in `elc-website/.env.example`).
+
+## Production API
+
+GitHub Pages hosts the frontend only. Deploy the Express API using the included `render.yaml`, then add the deployed API URL as the repository variable `VITE_API_URL` (for example, `https://elc-api.onrender.com/api`). Set the API's `CLIENT_ORIGIN` to `https://prince1-create.github.io`.
