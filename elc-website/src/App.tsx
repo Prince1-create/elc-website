@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode, useEffect, useState } from 'react';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
 
 type ContactResponse = {
   message?: string;
@@ -107,7 +108,7 @@ function Header({ user, onAuthClick, onLogout }: { user: AuthUser | null; onAuth
 }
 
 function HeroSection() {
-  const heroSlides = ["/v1.mp4", "/v2.mp4", "/v3.png"];
+  const heroSlides = ["v1.mp4", "v2.mp4", "v3.png"];
 
   return (
     <section id="home" className="hero-section">
@@ -122,15 +123,15 @@ function HeroSection() {
               loop
               playsInline
               preload={index === 0 ? "metadata" : "none"}
-              poster="/v3.png"
+              poster={assetUrl("v3.png")}
             >
-              <source src={src} type="video/mp4" />
+              <source src={assetUrl(src)} type="video/mp4" />
             </video>
           ) : (
             <img
               key={src}
               className={`hero-video hero-video--${index + 1}`}
-              src={src}
+              src={assetUrl(src)}
               alt=""
               loading="eager"
               fetchPriority="high"
