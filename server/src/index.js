@@ -12,9 +12,11 @@ dotenv.config();
    console.log("URI host:", (process.env.MONGODB_URI || "").split("@")[1]);
 
 const port = Number(process.env.PORT) || 5000;
-const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
-  .split(",")
-  .map((origin) => origin.trim())
+const allowedOrigins = [
+  ...(process.env.CLIENT_ORIGIN || "http://localhost:5173").split(","),
+  "https://prince1-create.github.io",
+]
+  .map((origin) => origin.trim().replace(/\/$/, ""))
   .filter(Boolean);
 
 const app = express();
