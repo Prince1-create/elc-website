@@ -4,7 +4,7 @@ Express and MongoDB API for the Excellent Leaders Consortium website.
 
 ## Setup
 
-1. Copy `.env.example` to `.env` and set `MONGODB_URI`.
+1. Copy `server/.env.example` to `.env` and set `MONGODB_URI` and `JWT_SECRET`.
 2. Run `npm install`.
 3. Run `npm run dev`.
 
@@ -21,6 +21,8 @@ The API starts at `http://localhost:5000`.
 - `PATCH /api/users/me` updates the authenticated user's name or password.
 
 Set `VITE_API_URL=http://localhost:5000/api` in the frontend application's environment file (already provided in `elc-website/.env.example`).
+
+`JWT_SECRET` must be a unique random value with at least 32 characters. Do not commit `.env` or share its MongoDB credentials.
 
 ## Production API
 

@@ -9,6 +9,7 @@ import { authRouter } from "./routes/auth.js";
 import { usersRouter } from "./routes/users.js";
 
 dotenv.config();
+   console.log("URI host:", (process.env.MONGODB_URI || "").split("@")[1]);
 
 const port = Number(process.env.PORT) || 5000;
 const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
@@ -60,7 +61,13 @@ app.use(
   }),
   contactRouter,
 );
+app.get("/", (req, res) => {
+  res.json({ status: "ok", service: "ELC API" });
+});
 
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
 app.use((_request, response) => {
   response.status(404).json({ message: "The requested API route was not found." });
 });
@@ -149,9 +156,14 @@ async function expandSrvUri(mongodbUri) {
 
 async function startServer() {
   const mongodbUri = process.env.MONGODB_URI;
+  const jwtSecret = process.env.JWT_SECRET;
 
   if (!mongodbUri) {
     throw new Error("MONGODB_URI must be set.");
+  }
+
+  if (!jwtSecret || jwtSecret === "replace-this-with-a-long-random-secret" || jwtSecret.length < 32) {
+    throw new Error("JWT_SECRET must be a unique random value of at least 32 characters.");
   }
 
   await mongoose.connect(await expandSrvUri(mongodbUri), { dbName: "elc" });

@@ -831,7 +831,8 @@ a {
   }
 
   .site-header > .container > .btn-primary {
-    display: none;
+    padding: 0.7rem 1rem;
+    font-size: 0.85rem;
   }
 
   .account-actions {
@@ -883,19 +884,19 @@ a {
   .site-nav {
     display: flex;
   }
+}
 
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
