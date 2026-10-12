@@ -1,6 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode, useEffect, useState } from 'react';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const apiUrl = import.meta.env.VITE_API_URL ?? '';
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
 
 type ContactResponse = {
@@ -18,14 +18,25 @@ type AuthResponse = ContactResponse & {
   user?: AuthUser;
 };
 
-async function readContactResponse(response: Response): Promise<ContactResponse> {
+async function readJsonResponse<T>(response: Response): Promise<T> {
   const contentType = response.headers.get('content-type');
 
   if (!contentType?.includes('application/json')) {
-    return {};
+    return {} as T;
   }
 
-  return response.json() as Promise<ContactResponse>;
+  return response.json() as Promise<T>;
+}
+
+async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 }
 
 export class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
@@ -356,12 +367,12 @@ function ContactSection() {
     };
 
     try {
-      const response = await fetch(`${apiUrl}/contact`, {
+      const response = await fetchWithTimeout(`${apiUrl}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const data = await readContactResponse(response);
+      const data = await readJsonResponse<ContactResponse>(response);
 
       if (!response.ok) {
         throw new Error(data.message || 'Unable to send your message. Please try again.');
@@ -457,12 +468,12 @@ function AuthPanel({ onClose, onAuthenticated }: { onClose: () => void; onAuthen
     const body = Object.fromEntries(form);
 
     try {
-      const response = await fetch(`${apiUrl}/auth/${mode}`, {
+      const response = await fetchWithTimeout(`${apiUrl}/auth/${mode}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = await readContactResponse(response) as AuthResponse;
+      const data = await readJsonResponse<AuthResponse>(response);
       if (!response.ok || !data.token || !data.user) {
         throw new Error(data.message || "The server could not process your request. Please try again.");
       }
@@ -521,9 +532,9 @@ function App() {
     const token = localStorage.getItem("elc_token");
     if (!token) return;
 
-    fetch(`${apiUrl}/users/me`, { headers: { Authorization: `Bearer ${token}` } })
+    fetchWithTimeout(`${apiUrl}/users/me`, { headers: { Authorization: `Bearer ${token}` } })
       .then(async (response) => {
-        const data = await readContactResponse(response) as AuthResponse;
+        const data = await readJsonResponse<AuthResponse>(response);
         if (!response.ok || !data.user) throw new Error("Session expired");
         localStorage.setItem("elc_user", JSON.stringify(data.user));
         setUser(data.user);
