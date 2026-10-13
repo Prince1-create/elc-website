@@ -15,6 +15,7 @@ const port = Number(process.env.PORT) || 5000;
 const allowedOrigins = [
   ...(process.env.CLIENT_ORIGIN || "http://localhost:5173").split(","),
   "https://prince1-create.github.io",
+  "https://elc-website-niawllg0f-prince-gyans-projects.vercel.app",
 ]
   .map((origin) => origin.trim().replace(/\/$/, ""))
   .filter(Boolean);

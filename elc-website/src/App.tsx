@@ -1,6 +1,10 @@
 import { Component, type ErrorInfo, type ReactNode, useEffect, useState } from 'react';
 
-const apiUrl = import.meta.env.VITE_API_URL ?? '';
+const apiUrl =
+  import.meta.env.VITE_API_URL ??
+  (import.meta.env.PROD
+    ? 'https://excellent-leaders-consortium.onrender.com/api'
+    : 'http://localhost:5000/api');
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
 
 type ContactResponse = {

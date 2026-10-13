@@ -26,4 +26,4 @@ Set `VITE_API_URL=http://localhost:5000/api` in the frontend application's envir
 
 ## Production API
 
-GitHub Pages hosts the frontend only. Deploy the Express API using the included `render.yaml`, then add the deployed API URL as the repository variable `VITE_API_URL` (for example, `https://elc-api.onrender.com/api`). Set the API's `CLIENT_ORIGIN` to `https://prince1-create.github.io`.
+The frontend is hosted separately from the Express API. Deploy the API using the included `render.yaml`, then set the frontend's `VITE_API_URL` to the deployed API URL (currently `https://excellent-leaders-consortium.onrender.com/api`). Set the API's `CLIENT_ORIGIN` on Render to the frontend's production origin. The Vercel deployment URL currently in use is allowed in the API's CORS configuration.
