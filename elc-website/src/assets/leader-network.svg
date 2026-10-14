@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-hidden="true">
+  <style>
+    .ln-links path { stroke-dasharray: 5 7; animation: lnFlow 1.6s linear infinite; }
+    .ln-pulse { transform-origin: 200px 200px; animation: lnPulse 2.6s ease-out infinite; }
+    .ln-nodes circle { transform-origin: center; transform-box: fill-box; animation: lnNode 3s ease-in-out infinite; }
+    .ln-nodes circle:nth-child(2n) { animation-delay: 0.9s; }
+    .ln-nodes circle:nth-child(3n) { animation-delay: 1.8s; }
+    @keyframes lnFlow { to { stroke-dashoffset: -24; } }
+    @keyframes lnPulse { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(2); opacity: 0; } }
+    @keyframes lnNode { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.35); } }
+  </style>
+  <defs>
+    <clipPath id="ln-blob">
+      <path d="M200 30 C300 22 372 96 368 196 C364 296 300 372 196 368 C92 364 30 296 34 196 C38 96 100 38 200 30Z"/>
+    </clipPath>
+    <radialGradient id="ln-bg" cx="50%" cy="45%" r="70%">
+      <stop offset="0" stop-color="#0d7a5f"/>
+      <stop offset="1" stop-color="#064e3b"/>
+    </radialGradient>
+  </defs>
+  <g clip-path="url(#ln-blob)">
+    <rect width="400" height="400" fill="url(#ln-bg)"/>
+    <g class="ln-links" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.55">
+      <path d="M200 200 L92 120"/>
+      <path d="M200 200 L318 110"/>
+      <path d="M200 200 L330 240"/>
+      <path d="M200 200 L110 290"/>
+      <path d="M200 200 L240 330"/>
+      <path d="M200 200 L70 210"/>
+    </g>
+    <g class="ln-nodes" fill="#f5f0e0">
+      <circle cx="92" cy="120" r="9"/>
+      <circle cx="318" cy="110" r="9"/>
+      <circle cx="330" cy="240" r="9"/>
+      <circle cx="110" cy="290" r="9"/>
+      <circle cx="240" cy="330" r="9"/>
+      <circle cx="70" cy="210" r="9"/>
+    </g>
+    <circle class="ln-pulse" cx="200" cy="200" r="46" fill="none" stroke="#c9a84c" stroke-width="2"/>
+    <circle cx="200" cy="200" r="30" fill="#c9a84c"/>
+    <path d="M186 200 L196 210 L216 188" stroke="#064e3b" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

@@ -1,4 +1,9 @@
-import { Component, type ErrorInfo, type ReactNode, useEffect, useState } from 'react';
+import { Component, Fragment, type CSSProperties, type ErrorInfo, type ReactNode, useEffect, useRef, useState } from 'react';
+
+import leaderVision from './assets/leader-vision.svg';
+import leaderNetwork from './assets/leader-network.svg';
+import leaderTeam from './assets/leader-team.svg';
+import leaderGrowth from './assets/leader-growth.svg';
 
 const apiUrl =
   import.meta.env.VITE_API_URL ??
@@ -43,6 +48,73 @@ async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}
   }
 }
 
+const delayStyle = (ms: number) => ({ '--reveal-delay': `${ms}ms` }) as CSSProperties;
+const staggerDelay = (index: number, step = 110) => delayStyle(index * step);
+
+function SplitWords({ text, delay = 0, step = 40 }: { text: string; delay?: number; step?: number }) {
+  return (
+    <>
+      {text.split(' ').map((word, index) => (
+        <Fragment key={index}>
+          {index > 0 && ' '}
+          <span className="split-word" style={delayStyle(delay + index * step)}>
+            {word}
+          </span>
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
+function CountUp({ value, duration = 1600 }: { value: string; duration?: number }) {
+  const match = /^(\d+)(\D*)$/.exec(value);
+  const end = match ? Number(match[1]) : null;
+  const suffix = match?.[2] ?? '';
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (end === null || !element) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+      setCount(end);
+      return;
+    }
+
+    let frame = 0;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+        const start = performance.now();
+        const tick = (now: number) => {
+          const progress = Math.min((now - start) / duration, 1);
+          setCount(Math.round(end * (1 - Math.pow(1 - progress, 3))));
+          if (progress < 1) frame = requestAnimationFrame(tick);
+        };
+        frame = requestAnimationFrame(tick);
+      },
+      { threshold: 0.6 },
+    );
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [end, duration]);
+
+  if (end === null) return value;
+
+  return (
+    <span ref={ref}>
+      <span aria-hidden="true">{count}{suffix}</span>
+      <span className="sr-only">{value}</span>
+    </span>
+  );
+}
+
 export class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   state = { hasError: false };
 
@@ -76,6 +148,8 @@ export class AppErrorBoundary extends Component<{ children: ReactNode }, { hasEr
 
 function Header({ user, onAuthClick, onLogout }: { user: AuthUser | null; onAuthClick: () => void; onLogout: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
   const navLinks = [
     { href: "#home", label: "Home" },
     { href: "#about", label: "About" },
@@ -85,8 +159,35 @@ function Header({ user, onAuthClick, onLogout }: { user: AuthUser | null; onAuth
     { href: "#contact", label: "Contact" },
   ];
 
+  useEffect(() => {
+    let frame = 0;
+
+    function update() {
+      frame = 0;
+      const scrollRange = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollRange > 0 ? window.scrollY / scrollRange : 0;
+      headerRef.current?.style.setProperty("--scroll-progress", String(progress));
+      setScrolled(window.scrollY > 12);
+    }
+
+    function requestUpdate() {
+      if (!frame) frame = requestAnimationFrame(update);
+    }
+
+    update();
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+
+    return () => {
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
   return (
-    <header className="site-header">
+    <header ref={headerRef} className={`site-header ${scrolled ? "site-header--scrolled" : ""}`}>
+      <span className="scroll-progress" aria-hidden="true" />
       <div className="container header-inner">
         <div className="brand">
           <span className="brand-mark">ELC</span>
@@ -157,7 +258,12 @@ function HeroSection() {
       <div className="container hero-grid">
         <div className="hero-copy">
           <span className="eyebrow">Leading for a stronger Africa</span>
-          <h1>Building Africa's premier leadership ecosystem that raises ethical, visionary, and transformational leaders who shape nations and generations.</h1>
+          <h1>
+            <SplitWords
+              text="Building Africa's premier leadership ecosystem that raises ethical, visionary, and transformational leaders who shape nations and generations."
+              delay={100}
+            />
+          </h1>
           <p>
             Excellent Leaders Consortium is a development hub for young changemakers who want to
             grow with confidence, make powerful community impact, and build lifelong leadership
@@ -178,7 +284,7 @@ function HeroSection() {
             <span className="hero-aside-heading">Building Africa's next generation of leaders</span>
           </div>
           <div className="hero-aside-stat">
-            <strong>150+</strong>
+            <strong><CountUp value="150+" /></strong>
             <span>leaders equipped to create meaningful change</span>
           </div>
           <div className="hero-aside-divider" />
@@ -192,35 +298,64 @@ function HeroSection() {
   );
 }
 
+const BLOB_PATH = "M200 30 C300 22 372 96 368 196 C364 296 300 372 196 368 C92 364 30 296 34 196 C38 96 100 38 200 30Z";
+
+function LeadershipGallery() {
+  const leaders = [
+    { src: leaderVision, alt: "Leader with a raised arm under a rising sunburst, symbolising vision", title: "Vision", tone: "#064e3b" },
+    { src: leaderNetwork, alt: "Leader at the centre of a connected network of people", title: "Connected leadership", tone: "#b5562f" },
+    { src: leaderTeam, alt: "Leader standing at a table guiding seated colleagues", title: "Team leadership", tone: "#c9a84c" },
+    { src: leaderGrowth, alt: "Ascending path toward a flag above rising bars, symbolising AI-powered growth", title: "Growth with AI", tone: "#0d7a5f" },
+  ];
+
+  return (
+    <div className="leader-gallery">
+      {leaders.map((leader, index) => (
+        <figure key={leader.title} className="leader-card reveal-item" style={staggerDelay(index, 120)}>
+          <div className="leader-frame">
+            <img className="leader-img" src={leader.src} alt={leader.alt} loading="lazy" />
+            <svg className="leader-outline" viewBox="0 0 400 400" aria-hidden="true" style={{ '--outline': leader.tone } as CSSProperties}>
+              <path d={BLOB_PATH} transform="translate(200 200) scale(1.07) translate(-200 -200)" />
+            </svg>
+          </div>
+          <figcaption>{leader.title}</figcaption>
+        </figure>
+      ))}
+    </div>
+  );
+}
+
 function AboutSection() {
   return (
-    <section id="about" className="section section-about">
+    <section id="about" className="section section-about reveal-section">
       <div className="container">
         <div className="section-header">
-          <p className="section-label">About ELC</p>
-          <h2>We develop bold, service-minded leaders for Africa’s future.</h2>
-          <p>
+          <p className="section-label reveal-item">About ELC</p>
+          <h2 className="reveal-text">
+            <SplitWords text="We develop bold, service-minded leaders for Africa’s future." delay={120} />
+          </h2>
+          <p className="reveal-item" style={delayStyle(320)}>
             Our programs combine real-world leadership training, mentorship, and practical
             community projects so participants leave ready to lead schools, startups, nonprofits,
             and civic outcomes with competence and compassion.
           </p>
         </div>
         <div className="feature-grid">
-          <article className="feature-card">
+          <article className="feature-card reveal-item" style={staggerDelay(0)}>
             <h3>Purpose-led development</h3>
             <p>
               Learn leadership from a values-driven framework that encourages social impact and
               long-term thinking.
             </p>
           </article>
-          <article className="feature-card">
+          <article className="feature-card reveal-item" style={staggerDelay(1)}>
             <h3>Practical skills</h3>
             <p>
               Build confidence in communication, project delivery, problem solving, teamwork, and
               resilience.
             </p>
           </article>
-          <article className="feature-card">
+          <article className="feature-card reveal-item" style={staggerDelay(2)}>
             <h3>Community impact</h3>
             <p>
               Work with peers on service projects designed to strengthen local communities and
@@ -228,6 +363,7 @@ function AboutSection() {
             </p>
           </article>
         </div>
+        <LeadershipGallery />
       </div>
     </section>
   );
@@ -250,19 +386,21 @@ function ProgramsSection() {
   ];
 
   return (
-    <section id="programs" className="section section-programs">
+    <section id="programs" className="section section-programs reveal-section">
       <div className="container">
         <div className="section-header">
-          <p className="section-label">Programs</p>
-          <h2>Programs designed for early-career leaders and changemakers.</h2>
-          <p>
+          <p className="section-label reveal-item">Programs</p>
+          <h2 className="reveal-text">
+            <SplitWords text="Programs designed for early-career leaders and changemakers." delay={120} />
+          </h2>
+          <p className="reveal-item" style={delayStyle(320)}>
             Each pathway is built to strengthen leadership character, expand influence, and help
             members move from good intentions to effective action.
           </p>
         </div>
         <div className="program-grid">
-          {programs.map((program) => (
-            <article key={program.title} className="program-card">
+          {programs.map((program, index) => (
+            <article key={program.title} className="program-card reveal-item" style={staggerDelay(index)}>
               <h3>{program.title}</h3>
               <p>{program.description}</p>
             </article>
@@ -281,20 +419,22 @@ function ImpactSection() {
   ];
 
   return (
-    <section id="impact" className="section section-impact">
+    <section id="impact" className="section section-impact reveal-section">
       <div className="container">
         <div className="section-header">
-          <p className="section-label">Impact</p>
-          <h2>Real leadership growth, real community results.</h2>
-          <p>
+          <p className="section-label reveal-item">Impact</p>
+          <h2 className="reveal-text">
+            <SplitWords text="Real leadership growth, real community results." delay={120} />
+          </h2>
+          <p className="reveal-item" style={delayStyle(320)}>
             Our alumni are building stronger teams, more resilient schools, and more vibrant
             communities across the region.
           </p>
         </div>
         <div className="stats-grid">
-          {stats.map((stat) => (
-            <article key={stat.label} className="stat-card">
-              <p className="stat-value">{stat.value}</p>
+          {stats.map((stat, index) => (
+            <article key={stat.label} className="stat-card reveal-item" style={staggerDelay(index, 130)}>
+              <p className="stat-value"><CountUp value={stat.value} /></p>
               <p className="stat-label">{stat.label}</p>
             </article>
           ))}
@@ -319,15 +459,17 @@ function TestimonialsSection() {
   ];
 
   return (
-    <section id="testimonials" className="section section-testimonials">
+    <section id="testimonials" className="section section-testimonials reveal-section">
       <div className="container">
         <div className="section-header">
-          <p className="section-label">Testimonials</p>
-          <h2>What our leaders say about ELC.</h2>
+          <p className="section-label reveal-item">Testimonials</p>
+          <h2 className="reveal-text">
+            <SplitWords text="What our leaders say about ELC." delay={120} />
+          </h2>
         </div>
         <div className="testimonial-grid">
-          {testimonials.map((item) => (
-            <article key={item.author} className="testimonial-card">
+          {testimonials.map((item, index) => (
+            <article key={item.author} className="testimonial-card reveal-item" style={staggerDelay(index, 130)}>
               <p className="testimonial-quote">“{item.quote}”</p>
               <p className="testimonial-author">{item.author}</p>
             </article>
@@ -340,11 +482,13 @@ function TestimonialsSection() {
 
 function ActionSection() {
   return (
-    <section className="section section-cta">
-      <div className="container cta-card">
+    <section className="section section-cta reveal-section">
+      <div className="container cta-card reveal-item">
         <div>
           <p className="section-label">Ready to lead?</p>
-          <h2>Join a cohort, launch a project, and grow with support.</h2>
+          <h2>
+            <SplitWords text="Join a cohort, launch a project, and grow with support." delay={120} />
+          </h2>
         </div>
         <a href="#contact" className="btn btn-primary btn-cta">
           Start your application
@@ -392,16 +536,18 @@ function ContactSection() {
   }
 
   return (
-    <section id="contact" className="section section-contact">
+    <section id="contact" className="section section-contact reveal-section">
       <div className="container contact-grid">
         <div>
-          <p className="section-label">Contact</p>
-          <h2>Ready to join the next generation of excellent leaders?</h2>
-          <p>
+          <p className="section-label reveal-item">Contact</p>
+          <h2 className="reveal-text">
+            <SplitWords text="Ready to join the next generation of excellent leaders?" delay={120} />
+          </h2>
+          <p className="reveal-item" style={delayStyle(320)}>
             Reach out to learn more about our cohorts, partnership opportunities, and upcoming
             workshops.
           </p>
-          <div className="contact-details">
+          <div className="contact-details reveal-item" style={delayStyle(420)}>
             <div>
               <strong>Phone</strong>
               <p>+233 247 639 270</p>
@@ -416,7 +562,7 @@ function ContactSection() {
             </div>
           </div>
         </div>
-        <form className="contact-form" onSubmit={submitContactForm}>
+        <form className="contact-form reveal-item" style={staggerDelay(1)} onSubmit={submitContactForm}>
           <label>
             Name
             <input type="text" name="name" placeholder="Your name" minLength={2} maxLength={100} required />
@@ -548,6 +694,30 @@ function App() {
         localStorage.removeItem("elc_user");
         setUser(null);
       });
+  }, []);
+
+  useEffect(() => {
+    const sections = document.querySelectorAll<HTMLElement>(".reveal-section");
+    document.documentElement.classList.add("reveal-ready");
+
+    if (!("IntersectionObserver" in window)) {
+      sections.forEach((section) => section.classList.add("is-visible"));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.12 },
+    );
+    sections.forEach((section) => observer.observe(section));
+
+    return () => observer.disconnect();
   }, []);
 
   function handleAuthenticated(authUser: AuthUser, token: string) {

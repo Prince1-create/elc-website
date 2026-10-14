@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-hidden="true">
+  <style>
+    .lv-rays { transform-origin: 200px 200px; animation: lvSpin 26s linear infinite; }
+    .lv-glow { transform-origin: 200px 200px; animation: lvBreathe 4.5s ease-in-out infinite; }
+    .lv-arm { transform-origin: 232px 230px; animation: lvWave 2.6s ease-in-out infinite; }
+    .lv-spark { transform-origin: 306px 140px; animation: lvTwinkle 2.2s ease-in-out infinite; }
+    @keyframes lvSpin { to { transform: rotate(360deg); } }
+    @keyframes lvBreathe { 0%, 100% { transform: scale(1); opacity: 0.12; } 50% { transform: scale(1.18); opacity: 0.24; } }
+    @keyframes lvWave { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-14deg); } }
+    @keyframes lvTwinkle { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } }
+  </style>
+  <defs>
+    <clipPath id="lv-blob">
+      <path d="M200 30 C300 22 372 96 368 196 C364 296 300 372 196 368 C92 364 30 296 34 196 C38 96 100 38 200 30Z"/>
+    </clipPath>
+    <linearGradient id="lv-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d7a5f"/>
+      <stop offset="1" stop-color="#064e3b"/>
+    </linearGradient>
+  </defs>
+  <g clip-path="url(#lv-blob)">
+    <rect width="400" height="400" fill="url(#lv-sky)"/>
+    <g class="lv-rays" fill="#c9a84c" opacity="0.18">
+      <path d="M200 200 L150 0 L250 0Z"/>
+      <path d="M200 200 L260 0 L340 40Z"/>
+      <path d="M200 200 L400 130 L400 220Z"/>
+      <path d="M200 200 L60 0 L140 0Z"/>
+    </g>
+    <circle class="lv-glow" cx="200" cy="200" r="120" fill="#f5f0e0" opacity="0.12"/>
+    <g class="lv-figure" fill="#f5f0e0">
+      <circle cx="200" cy="150" r="34"/>
+      <path d="M140 300 C140 230 166 200 200 200 C234 200 260 230 260 300Z"/>
+    </g>
+    <path class="lv-arm" d="M232 230 L300 150" stroke="#f5f0e0" stroke-width="16" stroke-linecap="round" fill="none"/>
+    <circle class="lv-spark" cx="306" cy="140" r="7" fill="#c9a84c"/>
+  </g>
+</svg>
