@@ -305,7 +305,7 @@ function LeadershipGallery() {
     { src: leaderVision, alt: "Leader with a raised arm under a rising sunburst, symbolising vision", title: "Vision", tone: "#064e3b" },
     { src: leaderNetwork, alt: "Leader at the centre of a connected network of people", title: "Connected leadership", tone: "#b5562f" },
     { src: leaderTeam, alt: "Leader standing at a table guiding seated colleagues", title: "Team leadership", tone: "#c9a84c" },
-    { src: leaderGrowth, alt: "Ascending path toward a flag above rising bars, symbolising AI-powered growth", title: "Growth with AI", tone: "#0d7a5f" },
+    { src: leaderGrowth, alt: "Ascending path toward a flag above rising bars, symbolising technology-driven growth", title: "Growth with technology", tone: "#0d7a5f" },
   ];
 
   return (
